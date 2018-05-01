@@ -110,6 +110,7 @@ Session.vim
 # temporary
 .netrwhist
 *~
+my_token.py
 # auto-generated tag files
 tags
 
