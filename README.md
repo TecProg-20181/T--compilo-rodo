@@ -27,3 +27,11 @@ em forma de issue no repositório do time
 
 ### Passo 6: Para desativar: digite em qualquer lugar deactivate.
 
+# Atualizando Dependências
+O primeiro comando instala a biblioteca requests. O segundo comando instala todas as dependências que existem no arquivo requirements.txt .
+### Comando 1: pip install requests
+
+### Comando 2: pip install -r requirements.txt
+
+
+
