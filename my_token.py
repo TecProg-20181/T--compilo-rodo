@@ -1,3 +1,5 @@
-
 def getToken():
-    return "<insert bot's token here>"
+    #Put your token here
+    token = ""
+
+    return token
