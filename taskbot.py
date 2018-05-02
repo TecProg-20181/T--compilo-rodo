@@ -289,19 +289,19 @@ def handle_updates(updates):
                         if not depid.isdigit():
                             send_message("All dependencies ids must be numeric, and not {}".format(depid), chat)
                         else:
-                            depid = int(depid)
-                            query = db.session.query(Task).filter_by(id=depid, chat=chat)
-                            try:
-                                taskdep = query.one()
-                                taskdep.parents += str(task.id) + ','
-                            except sqlalchemy.orm.exc.NoResultFound:
-                                send_message("_404_ Task {} not found x.x".format(depid), chat)
-                                continue
-
-                            deplist = task.dependencies.split(',')
                             if verify_circular_dependency_in_list(msg, text, chat):
                                 send_message('Can not has circular dependency', chat)
                             else:
+                                depid = int(depid)
+                                query = db.session.query(Task).filter_by(id=depid, chat=chat)
+                                try:
+                                    taskdep = query.one()
+                                    taskdep.parents += str(task.id) + ','
+                                except sqlalchemy.orm.exc.NoResultFound:
+                                    send_message("_404_ Task {} not found x.x".format(depid), chat)
+                                    continue
+
+                                deplist = task.dependencies.split(',')
                                 if str(depid) not in deplist:
                                     task.dependencies += str(depid) + ','
 
