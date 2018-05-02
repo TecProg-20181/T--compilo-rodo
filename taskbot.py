@@ -236,7 +236,7 @@ def handle_updates(updates):
                 elif task.status == 'DONE':
                     icon = '\U00002611'
 
-                a += '[[{}]] {} {}\n'.format(task.id, icon, task.name)
+                a += '[[{}]] {} {} with priority [[{}]]\n'.format(task.id, icon, task.name, task.priority)
                 a += deps_text(task, chat)
 
             send_message(a, chat)
@@ -246,15 +246,15 @@ def handle_updates(updates):
             query = db.session.query(Task).filter_by(status='TODO', chat=chat).order_by(Task.id)
             a += '\n\U0001F195 *TODO*\n'
             for task in query.all():
-                a += '[[{}]] {}\n'.format(task.id, task.name)
+                a += '[[{}]] {} with priority [[{}]]\n'.format(task.id, task.name, task.priority)
             query = db.session.query(Task).filter_by(status='DOING', chat=chat).order_by(Task.id)
             a += '\n\U000023FA *DOING*\n'
             for task in query.all():
-                a += '[[{}]] {}\n'.format(task.id, task.name)
+                a += '[[{}]] {} with priority [[{}]]\n'.format(task.id, task.name, task.priority)
             query = db.session.query(Task).filter_by(status='DONE', chat=chat).order_by(Task.id)
             a += '\n\U00002611 *DONE*\n'
             for task in query.all():
-                a += '[[{}]] {}\n'.format(task.id, task.name)
+                a += '[[{}]] {} with priority [[{}]]\n'.format(task.id, task.name, task.priority)
 
             send_message(a, chat)
         elif command == '/dependson':
@@ -289,18 +289,21 @@ def handle_updates(updates):
                         if not depid.isdigit():
                             send_message("All dependencies ids must be numeric, and not {}".format(depid), chat)
                         else:
-                            depid = int(depid)
-                            query = db.session.query(Task).filter_by(id=depid, chat=chat)
-                            try:
-                                taskdep = query.one()
-                                taskdep.parents += str(task.id) + ','
-                            except sqlalchemy.orm.exc.NoResultFound:
-                                send_message("_404_ Task {} not found x.x".format(depid), chat)
-                                continue
+                            if verify_circular_dependency_in_list(msg, text, chat):
+                                send_message('Can not has circular dependency', chat)
+                            else:
+                                depid = int(depid)
+                                query = db.session.query(Task).filter_by(id=depid, chat=chat)
+                                try:
+                                    taskdep = query.one()
+                                    taskdep.parents += str(task.id) + ','
+                                except sqlalchemy.orm.exc.NoResultFound:
+                                    send_message("_404_ Task {} not found x.x".format(depid), chat)
+                                    continue
 
-                            deplist = task.dependencies.split(',')
-                            if str(depid) not in deplist:
-                                task.dependencies += str(depid) + ','
+                                deplist = task.dependencies.split(',')
+                                if str(depid) not in deplist:
+                                    task.dependencies += str(depid) + ','
 
                 db.session.commit()
                 send_message("Task {} dependencies up to date".format(task_id), chat)
@@ -343,6 +346,35 @@ def handle_updates(updates):
             send_message("I'm sorry dave. I'm afraid I can't do that.", chat)
 
 
+def verify_circular_dependency_in_list(task_id, dependency_id, chat):
+    """
+    return True means that are circular dependency
+    return False means that aren't circular dependency
+    """
+    query = db.session.query(Task).filter_by(id=dependency_id, chat=chat)
+    dependency = query.one()
+
+    if dependency.dependencies == '':
+        return False
+    else :
+        total_result = False
+        list_of_dependencies = dependency.dependencies.split(',')
+
+        for i in list_of_dependencies:
+            if i == '':
+                continue
+            query = db.session.query(Task).filter_by(id=i, chat=chat)
+            task = query.one()
+            another_dependency = dependency.dependencies.split(',')
+            if task_id in another_dependency:
+                return True
+            else:
+                parcial_result = verify_circular_dependency_in_list(task_id, task.id, chat)
+                total_result = total_result | parcial_result
+
+        return total_result
+
+
 def main():
     last_update_id = None
 
@@ -359,4 +391,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
