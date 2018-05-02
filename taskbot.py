@@ -355,22 +355,24 @@ def verify_circular_dependency_in_list(task_id, dependency_id, chat):
     dependency = query.one()
 
     if dependency.dependencies == '':
-        return True
+        return False
     else :
-        total_result = True
+        total_result = False
         list_of_dependencies = dependency.dependencies.split(',')
 
         for i in list_of_dependencies:
+            if i == '':
+                continue
             query = db.session.query(Task).filter_by(id=i, chat=chat)
             task = query.one()
             another_dependency = dependency.dependencies.split(',')
             if task_id in another_dependency:
-                return False
+                return True
             else:
                 parcial_result = verify_circular_dependency_in_list(task_id, task.id, chat)
-                total_result = total_result & parcial_result
+                total_result = total_result | parcial_result
 
-        return not total_result
+        return total_result
 
 
 def main():
