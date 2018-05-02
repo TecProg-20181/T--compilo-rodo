@@ -299,8 +299,11 @@ def handle_updates(updates):
                                 continue
 
                             deplist = task.dependencies.split(',')
-                            if str(depid) not in deplist:
-                                task.dependencies += str(depid) + ','
+                            if verify_circular_dependency_in_list(msg, text, chat):
+                                send_message('Can not has circular dependency', chat)
+                            else:
+                                if str(depid) not in deplist:
+                                    task.dependencies += str(depid) + ','
 
                 db.session.commit()
                 send_message("Task {} dependencies up to date".format(task_id), chat)
@@ -343,6 +346,33 @@ def handle_updates(updates):
             send_message("I'm sorry dave. I'm afraid I can't do that.", chat)
 
 
+def verify_circular_dependency_in_list(task_id, dependency_id, chat):
+    """
+    return True means that are circular dependency
+    return False means that aren't circular dependency
+    """
+    query = db.session.query(Task).filter_by(id=dependency_id, chat=chat)
+    dependency = query.one()
+
+    if dependency.dependencies == '':
+        return True
+    else :
+        total_result = True
+        list_of_dependencies = dependency.dependencies.split(',')
+
+        for i in list_of_dependencies:
+            query = db.session.query(Task).filter_by(id=i, chat=chat)
+            task = query.one()
+            another_dependency = dependency.dependencies.split(',')
+            if task_id in another_dependency:
+                return False
+            else:
+                parcial_result = verify_circular_dependency_in_list(task_id, task.id, chat)
+                total_result = total_result & parcial_result
+
+        return not total_result
+
+
 def main():
     last_update_id = None
 
@@ -359,4 +389,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
