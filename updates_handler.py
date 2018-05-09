@@ -6,6 +6,7 @@ import sqlalchemy
 import db
 from db import Task
 from url_handler import send_message
+from command_handler import new_task, rename_task, duplicate_task
 
 # Private Costants
 __HELP = """
@@ -43,60 +44,13 @@ def handle_updates(updates):
         print(command, msg, chat)
 
         if command == '/new':
-            task = Task(chat=chat, name=msg, status='TODO', dependencies='', parents='', priority='')
-            db.session.add(task)
-            db.session.commit()
-            send_message("New task *TODO* [[{}]] {}".format(task.id, task.name), chat)
+            new_task(chat, msg)
 
         elif command == '/rename':
-            text = ''
-            if msg != '':
-                if len(msg.split(' ', 1)) > 1:
-                    text = msg.split(' ', 1)[1]
-                msg = msg.split(' ', 1)[0]
-
-            if not msg.isdigit():
-                send_message("You must inform the task id", chat)
-            else:
-                task_id = int(msg)
-                query = db.session.query(Task).filter_by(id=task_id, chat=chat)
-                try:
-                    task = query.one()
-                except sqlalchemy.orm.exc.NoResultFound:
-                    send_message("_404_ Task {} not found x.x".format(task_id), chat)
-                    return
-
-                if text == '':
-                    send_message("You want to modify task {}, but you didn't provide any new text".format(task_id), chat)
-                    return
-
-                old_text = task.name
-                task.name = text
-                db.session.commit()
-                send_message("Task {} redefined from {} to {}".format(task_id, old_text, text), chat)
+            rename_task(chat,msg)
+            
         elif command == '/duplicate':
-            if not msg.isdigit():
-                send_message("You must inform the task id", chat)
-            else:
-                task_id = int(msg)
-                query = db.session.query(Task).filter_by(id=task_id, chat=chat)
-                try:
-                    task = query.one()
-                except sqlalchemy.orm.exc.NoResultFound:
-                    send_message("_404_ Task {} not found x.x".format(task_id), chat)
-                    return
-
-                dtask = Task(chat=task.chat, name=task.name, status=task.status, dependencies=task.dependencies,
-                             parents=task.parents, priority=task.priority, duedate=task.duedate)
-                db.session.add(dtask)
-
-                for t in task.dependencies.split(',')[:-1]:
-                    qy = db.session.query(Task).filter_by(id=int(t), chat=chat)
-                    t = qy.one()
-                    t.parents += '{},'.format(dtask.id)
-
-                db.session.commit()
-                send_message("New task *TODO* [[{}]] {}".format(dtask.id, dtask.name), chat)
+            duplicate_task(chat,msg)
 
         elif command == '/delete':
             if not msg.isdigit():
