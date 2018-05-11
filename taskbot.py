@@ -336,6 +336,27 @@ def handle_updates(updates):
                         send_message("*Task {}* priority has priority *{}*".format(task_id, text.lower()), chat)
                 db.session.commit()
 
+        elif command == '/duedate':
+            send_message("Insert duedate for the task:", chat)
+            if message != '':
+                if len(message.split(' ', 1)) > 1:
+                    text = message.split(' ', 1)[1]
+                msg = message.split(' ', 1)[0]
+
+                if not message.isdigit():
+                    send_message("You must inform the task id", chat)
+                else:
+                    task_id = int(msg)
+                    query = db.session.query(Task).filter_by(id=task_id, chat=chat)
+                    try:
+                        task = query.one()
+                    except sqlalchemy.orm.exc.NoResultFound:
+                        send_message("_404_ Task {} not found x.x".format(task_id), chat)
+                        return
+
+                    if duedate == '':
+                        send_message("The task doesn't have duedate *{}*".format(task_id), chat)
+
         elif command == '/start':
             send_message("Welcome! Here is a list of things you can do.", chat)
             send_message(HELP, chat)
@@ -363,31 +384,5 @@ def verify_circular_dependency_in_list(task_id, dependency_id, chat):
         for i in list_of_dependencies:
             if i == '':
                 continue
-            query = db.session.query(Task).filter_by(id=i, chat=chat)
-            task = query.one()
-            another_dependency = dependency.dependencies.split(',')
-            if task_id in another_dependency:
-                return True
-            else:
-                parcial_result = verify_circular_dependency_in_list(task_id, task.id, chat)
-                total_result = total_result | parcial_result
-
-        return total_result
-
-
-def main():
-    last_update_id = None
-
-    while True:
-        print("Updates")
-        updates = get_updates(last_update_id)
-
-        if len(updates["result"]) > 0:
-            last_update_id = get_last_update_id(updates) + 1
-            handle_updates(updates)
-
-        time.sleep(0.5)
-
-
 if __name__ == '__main__':
     main()
