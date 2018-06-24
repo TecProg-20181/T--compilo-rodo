@@ -30,5 +30,15 @@ class Task(Base):
 
 Base.metadata.create_all(engine)
 
+def search_Task(task_id, chat_id):
+    query = session.query(Task).filter_by(id=task_id, chat=chat_id)
+    try:
+        task = query.one()
+    except sqlalchemy.orm.exc.NoResultFound:
+        send_message("_404_ Task {} not found x.x".format(task_id), chat_id)
+        return
+    return task
+        
+
 if __name__ == '__main__':
     pass
