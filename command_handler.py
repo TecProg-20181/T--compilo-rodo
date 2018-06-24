@@ -127,7 +127,7 @@ def list_task(chat_id, msg):
         elif task.status == 'DONE':
             icon = '\U00002611'
 
-        a += '[[{}]] {} {} with priority [[{}]]\n'.format(task.id, icon, task.name, task.priority)
+        a += __priority_message(task)
         a += __deps_text(task, chat_id)
 
     send_message(a, chat_id)
@@ -137,15 +137,15 @@ def list_task(chat_id, msg):
     query = db.session.query(Task).filter_by(status='TODO', chat=chat_id).order_by(Task.id)
     a += '\n\U0001F195 *TODO*\n'
     for task in query.all():
-        a += '[[{}]] {} with priority [[{}]]\n'.format(task.id, task.name, task.priority)
+        a += __priority_message(task)
     query = db.session.query(Task).filter_by(status='DOING', chat=chat_id).order_by(Task.id)
     a += '\n\U000023FA *DOING*\n'
     for task in query.all():
-        a += '[[{}]] {} with priority [[{}]]\n'.format(task.id, task.name, task.priority)
+        a += __priority_message(task)
     query = db.session.query(Task).filter_by(status='DONE', chat=chat_id).order_by(Task.id)
     a += '\n\U00002611 *DONE*\n'
     for task in query.all():
-        a += '[[{}]] {} with priority [[{}]]\n'.format(task.id, task.name, task.priority)
+        a += __priority_message(task) 
 
     send_message(a, chat_id)
 
@@ -265,3 +265,10 @@ def __verify_circular_dependency_in_list(task_id, dependency_id, chat_id):
                 total_result = total_result | parcial_result
 
         return total_result
+def __priority_message(task):
+    a = ''
+    a += '[[{}]] {}'.format(task.id, task.name)
+    if task.priority != '':
+        a += ' with priority [[{}]]'.format(task.priority)    
+    a += '\n'
+    return a
