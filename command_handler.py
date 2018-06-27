@@ -1,6 +1,7 @@
 import db
 from db import Task
 from url_handler import send_message
+from git_api import make_github_issue
 
 # Private Constants
 __HELP = """
@@ -14,6 +15,7 @@ __HELP = """
  /dependson ID ID...
  /duplicate ID
  /priority ID PRIORITY{low, medium, high}
+ /create_issue ID
  /help
 """
 
@@ -280,6 +282,14 @@ def priority_task(chat_id, msg):
                 send_message("*Task {}* priority has priority *{}*".format(task_id, text.lower()), chat_id)
         db.session.commit()
 
+def create_issue(chat_id, msg):
+    task_id = int(msg)
+    task = db.search_Task(task_id, chat_id)
+    #body = "Duedate: "+task.duedate
+    if make_github_issue(task.name, [task.status, 'create_by_bot']):
+        send_message("Issue created.", chat_id)
+    else:
+        send_message("Bad attempt.", chat_id)
 
 def __deps_text(task, chat_id, preceed=''):
     text = ''
