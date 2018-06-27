@@ -120,6 +120,8 @@ def delete_task(chat_id, msg):
     else:
         task_id = int(msg)
         task = db.search_Task(task_id, chat_id)
+        if task == None:
+            return
         for t in task.dependencies.split(',')[:-1]:
             t = db.search_Task(int(t), chat_id)
             t.parents = t.parents.replace('{},'.format(task.id), '')
