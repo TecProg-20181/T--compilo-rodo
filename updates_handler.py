@@ -12,7 +12,8 @@ from command_handler import (new_task,\
                             dependson_task,\
                             priority_task,\
                             start_task,\
-                            help_task,)
+                            help_task,\
+                            duedate_task,)
 
 # Public Methods
 def handle_updates(updates):
@@ -65,6 +66,8 @@ def handle_updates(updates):
             start_task(chat)
         elif command == '/help':
             help_task(chat)
+        elif command == '/duedate':
+            duedate_task(msg, chat)
         else:
             send_message("I'm sorry dave. I'm afraid I can't do that.", chat)
 

@@ -2,6 +2,7 @@ import db
 import sqlalchemy
 from db import Task
 from url_handler import send_message
+from datetime import datetime
 
 # Private Costants
 __HELP = """
@@ -11,6 +12,7 @@ __HELP = """
  /done ID
  /delete ID
  /list
+ /duedate ID DATE(dd/mm/yyyy)
  /rename ID NOME
  /dependson ID ID...
  /duplicate ID
@@ -71,7 +73,7 @@ def duplicate_task(chat_id, msg):
             t.parents += '{},'.format(dtask.id)
 
         db.session.commit()
-        send_message("New task *TODO* [[{}]] {}".format(dtask.id, dtask.name), chat_id)
+        send_message("New task *TODO* [[{}]] {} with duedate [[{}]]".format(dtask.id, dtask.name), chat_id, task.duedate)
 
 def delete_task(chat_id, msg):
     if not msg.isdigit():
@@ -94,7 +96,7 @@ def todo_task(chat_id, msg):
         task = db.search_Task(task_id, chat_id)
         task.status = 'TODO'
         db.session.commit()
-        send_message("*TODO* task [[{}]] {}".format(task.id, task.name), chat_id)
+        send_message("*TODO* task [[{}]] {} with duedate [[{}]]".format(task.id, task.name), chat_id, task.duedate)
 
 def doing_task(chat_id, msg):
     if not msg.isdigit():
@@ -104,7 +106,7 @@ def doing_task(chat_id, msg):
         task = db.search_Task(task_id, chat_id)
         task.status = 'DOING'
         db.session.commit()
-        send_message("*DOING* task [[{}]] {}".format(task.id, task.name), chat_id)
+        send_message("*DOING* task [[{}]] {} with duedate [[{}]]".format(task.id, task.name), chat_id, task.duedate)
 
 def done_task(chat_id, msg):
     if not msg.isdigit():
@@ -189,6 +191,7 @@ def dependson_task(chat_id, msg):
 
         db.session.commit()
         send_message("Task {} dependencies up to date".format(task_id), chat_id)
+
 def priority_task(chat_id, msg):
     text = ''
     if msg != '':
@@ -213,6 +216,34 @@ def priority_task(chat_id, msg):
                 send_message("*Task {}* priority has priority *{}*".format(task_id, text.lower()), chat_id)
         db.session.commit()
 
+def duedate_task(msg, chat):
+    text = ''
+    if msg != '':
+        if len(msg.split(' ', 1)) > 1:
+            text = msg.split(' ', 1)[1]
+            msg = msg.split(' ', 1)[0]
+
+            if not msg.isdigit():
+                send_message("You must inform the task id", chat)
+            else:
+                task_id = int(msg)
+                query = db.session.query(Task).filter_by(id=task_id, chat=chat)
+                try:
+                    task = query.one()
+                except sqlalchemy.orm.exc.NoResultFound:
+                    send_message("_404_ Task {} not found x.x".format(task_id), chat)
+                    return
+
+                if text == '':
+                    send_message("You did not provide a date for the task:{} ".format(task_id), chat)
+                    return
+                else:
+                    if not __verify_date_mask(text):
+                        send_message("duedate does not meet expected standard: dd/mm/YYYY", chat)
+                    else:
+                        task.duedate = datetime.strptime(text, '%d/%m/%Y')
+                        send_message("Task {} has the duedate: {}".format(task_id, text), chat)
+                db.session.commit()
 
 # Private methods
 def __deps_text(task, chat_id, preceed=''):
@@ -266,10 +297,18 @@ def __verify_circular_dependency_in_list(task_id, dependency_id, chat_id):
                 total_result = total_result | parcial_result
 
         return total_result
+
+def __verify_date_mask(text):
+    try:
+        datetime.strptime(text, '%d/%m/%Y')
+        return True
+    except ValueError:
+        return False
+
 def __priority_message(task):
     a = ''
     a += '[[{}]] {}'.format(task.id, task.name)
     if task.priority != '':
-        a += ' with priority [[{}]]'.format(task.priority)    
+        a += ' with priority [[{}]]'.format(task.priority)
     a += '\n'
     return a
