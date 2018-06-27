@@ -13,15 +13,21 @@ from command_handler import (new_task,\
                             priority_task,\
                             start_task,\
                             help_task,\
-                            duedate_task,)
+                            duedate_task,\
+                            create_issue,)
 
-# Public Methods
+
 def handle_updates(updates):
+    """
+    This method will redirect the execution according to the keyword.
+    :param updates: Contain telegram keyword.
+    """
     for update in updates["result"]:
         if 'message' in update:
             message = update['message']
         elif 'edited_message' in update:
             message = update['edited_message']
+        # If it isn't a message
         else:
             print('Can\'t process! {}'.format(update))
             return
@@ -57,17 +63,26 @@ def handle_updates(updates):
             done_task(chat, msg)
 
         elif command == '/list':
-            list_task(chat, msg)
+            list_task(chat)
+
         elif command == '/dependson':
             dependson_task(chat, msg)
+
         elif command == '/priority':
             priority_task(chat, msg)
+
         elif command == '/start':
             start_task(chat)
+
         elif command == '/help':
             help_task(chat)
+
         elif command == '/duedate':
             duedate_task(msg, chat)
+
+        elif command == '/create_issue':
+            create_issue(chat, msg)
+            
         else:
             send_message("I'm sorry dave. I'm afraid I can't do that.", chat)
 

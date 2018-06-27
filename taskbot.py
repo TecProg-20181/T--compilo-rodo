@@ -6,6 +6,7 @@ from time import sleep
 from updates_handler import handle_updates
 from url_handler import get_last_update_id, get_updates
 
+
 def main():
     last_update_id = None
 
