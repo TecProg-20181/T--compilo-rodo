@@ -7,9 +7,10 @@ import urllib
 # Customized modules
 from my_token import *
 
-# Private Costants
+# Private Constants
 __TOKEN = getToken()
 __URL = "https://api.telegram.org/bot{}/".format(__TOKEN)
+
 
 # Public Methods
 def send_message(text, chat_id, reply_markup=None):
@@ -19,12 +20,14 @@ def send_message(text, chat_id, reply_markup=None):
         url += "&reply_markup={}".format(reply_markup)
     __get_url(url)
 
+
 def get_updates(offset=None):
     url = __URL + "getUpdates?timeout=100"
     if offset:
         url += "&offset={}".format(offset)
     js = __get_json_from_url(url)
     return js
+
 
 def get_last_update_id(updates):
     update_ids = []
@@ -33,11 +36,13 @@ def get_last_update_id(updates):
 
     return max(update_ids)
 
+
 # Private Methods
 def __get_url(url):
     response = requests.get(url)
     content = response.content.decode("utf8")
     return content
+
 
 def __get_json_from_url(url):
     content = __get_url(url)
