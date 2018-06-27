@@ -254,11 +254,6 @@ def dependson_task(chat_id, msg):
 
         db.session.commit()
         send_message("Task {} dependencies up to date".format(task_id), chat_id)
-
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
 def priority_task(chat_id, msg):
     """
     This method will set the task priority.
