@@ -1,9 +1,8 @@
 import db
-import sqlalchemy
 from db import Task
 from url_handler import send_message
 
-# Private Costants
+# Private Constants
 __HELP = """
  /new NOME
  /todo ID
@@ -18,25 +17,49 @@ __HELP = """
  /help
 """
 
-# Public methods
+
 def start_task(chat_id):
+    """
+    This method will start the bot, show a Welcome Message and a list of possible commands.
+    :param chat_id: specify the current chat.
+    """
     send_message("Welcome! Here is a list of things you can do.", chat_id)
     send_message(__HELP, chat_id)
 
+
 def help_task(chat_id):
+    """
+    This method will show the help list.
+    :param chat_id: specify the current chat.
+    """
     send_message("Here is a list of things you can do.", chat_id)
     send_message(__HELP, chat_id)
+
+
 def new_task(chat_id, name):
+    """
+    This method will create a new task.
+    :param chat_id: specify the current chat.
+    :param name: the name of the new task.
+    """
     task = Task(chat=chat_id, name=name, status='TODO', dependencies='', parents='', priority='')
     db.session.add(task)
     db.session.commit()
     send_message("New task *TODO* [[{}]] {}".format(task.id, task.name), chat_id)
 
+
 def rename_task(chat_id, msg):
+    """
+    This method will rename a specific task.
+    :param chat_id: specify the current chat.
+    :param msg: get the params passed after /rename.
+    """
+    # This variable will contain the new name of the task.
     text = ''
     if msg != '':
         if len(msg.split(' ', 1)) > 1:
             text = msg.split(' ', 1)[1]
+        # Getting the id.
         msg = msg.split(' ', 1)[0]
 
     if not msg.isdigit():
@@ -44,7 +67,7 @@ def rename_task(chat_id, msg):
     else:
         task_id = int(msg)
         task = db.search_Task(task_id, chat_id)
-
+        # If message doesn't have a new name.
         if text == '':
             send_message("You want to modify task {}, but you didn't provide any new text".format(task_id), chat_id)
             return
@@ -54,7 +77,13 @@ def rename_task(chat_id, msg):
         db.session.commit()
         send_message("Task {} redefined from {} to {}".format(task_id, old_text, text), chat_id)
 
+
 def duplicate_task(chat_id, msg):
+    """
+    This method will duplicate a specific task.
+    :param chat_id: specify the current chat.
+    :param msg: contains an id that specifies a specific task.
+    """
     if not msg.isdigit():
         send_message("You must inform the task id", chat_id)
     else:
@@ -62,7 +91,7 @@ def duplicate_task(chat_id, msg):
         task = db.search_Task(task_id, chat_id)
 
         dtask = Task(chat=task.chat, name=task.name, status=task.status, dependencies=task.dependencies,
-                        parents=task.parents, priority=task.priority, duedate=task.duedate)
+                     parents=task.parents, priority=task.priority, duedate=task.duedate)
         db.session.add(dtask)
 
         for t in task.dependencies.split(',')[:-1]:
@@ -72,7 +101,13 @@ def duplicate_task(chat_id, msg):
         db.session.commit()
         send_message("New task *TODO* [[{}]] {}".format(dtask.id, dtask.name), chat_id)
 
+
 def delete_task(chat_id, msg):
+    """
+    This method will delete a specific task.
+    :param chat_id: specify the current chat.
+    :param msg: Contains an id that specify a specific task.
+    """
     if not msg.isdigit():
         send_message("You must inform the task id", chat_id)
     else:
@@ -85,7 +120,13 @@ def delete_task(chat_id, msg):
         db.session.commit()
         send_message("Task [[{}]] deleted".format(task_id), chat_id)
 
+
 def todo_task(chat_id, msg):
+    """
+    This method will show the todo list.
+    :param chat_id: Specify the current chat.
+    :param msg: Contains a task id.
+    """
     if not msg.isdigit():
         send_message("You must inform the task id", chat_id)
     else:
@@ -95,7 +136,13 @@ def todo_task(chat_id, msg):
         db.session.commit()
         send_message("*TODO* task [[{}]] {}".format(task.id, task.name), chat_id)
 
+
 def doing_task(chat_id, msg):
+    """
+    This method will show the doing task.
+    :param chat_id: Specify the current chat.
+    :param msg: Contains a task id.
+    """
     if not msg.isdigit():
         send_message("You must inform the task id", chat_id)
     else:
@@ -105,7 +152,13 @@ def doing_task(chat_id, msg):
         db.session.commit()
         send_message("*DOING* task [[{}]] {}".format(task.id, task.name), chat_id)
 
+
 def done_task(chat_id, msg):
+    """
+    This method will show the done task.
+    :param chat_id: Specify the current chat.
+    :param msg: Contains a task id.
+    """
     if not msg.isdigit():
         send_message("You must inform the task id", chat_id)
     else:
@@ -115,7 +168,12 @@ def done_task(chat_id, msg):
         db.session.commit()
         send_message("*DONE* task [[{}]] {}".format(task.id, task.name), chat_id)
 
-def list_task(chat_id, msg):
+
+def list_task(chat_id):
+    """
+    This method will list a list task.
+    :param chat_id: Specify the current chat.
+    """
     a = ''
 
     a += '\U0001F4CB Task List\n'
@@ -145,9 +203,10 @@ def list_task(chat_id, msg):
     query = db.session.query(Task).filter_by(status='DONE', chat=chat_id).order_by(Task.id)
     a += '\n\U00002611 *DONE*\n'
     for task in query.all():
-        a += __priority_message(task) 
+        a += __priority_message(task)
 
     send_message(a, chat_id)
+
 
 def dependson_task(chat_id, msg):
     text = ''
@@ -181,14 +240,21 @@ def dependson_task(chat_id, msg):
                         depid = int(depid)
                         taskdep = db.search_Task(task_id, chat_id)
                         taskdep.parents += str(task.id) + ','
-                        
+
                         deplist = task.dependencies.split(',')
                         if str(depid) not in deplist:
                             task.dependencies += str(depid) + ','
 
         db.session.commit()
         send_message("Task {} dependencies up to date".format(task_id), chat_id)
+
+
 def priority_task(chat_id, msg):
+    """
+    This method will set the task priority.
+    :param chat_id: Specify the current chat.
+    :param msg: Contains a task id and their priority.
+    """
     text = ''
     if msg != '':
         if len(msg.split(' ', 1)) > 1:
@@ -213,7 +279,6 @@ def priority_task(chat_id, msg):
         db.session.commit()
 
 
-# Private methods
 def __deps_text(task, chat_id, preceed=''):
     text = ''
 
@@ -239,6 +304,7 @@ def __deps_text(task, chat_id, preceed=''):
 
     return text
 
+
 def __verify_circular_dependency_in_list(task_id, dependency_id, chat_id):
     """
     return True means that are circular dependency
@@ -249,7 +315,7 @@ def __verify_circular_dependency_in_list(task_id, dependency_id, chat_id):
 
     if dependency.dependencies == '':
         return False
-    else :
+    else:
         total_result = False
         list_of_dependencies = dependency.dependencies.split(',')
 
@@ -265,10 +331,12 @@ def __verify_circular_dependency_in_list(task_id, dependency_id, chat_id):
                 total_result = total_result | parcial_result
 
         return total_result
+
+
 def __priority_message(task):
     a = ''
     a += '[[{}]] {}'.format(task.id, task.name)
     if task.priority != '':
-        a += ' with priority [[{}]]'.format(task.priority)    
+        a += ' with priority [[{}]]'.format(task.priority)
     a += '\n'
     return a
