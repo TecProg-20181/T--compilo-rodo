@@ -309,6 +309,6 @@ def __priority_message(task):
     a = ''
     a += '[[{}]] {}'.format(task.id, task.name)
     if task.priority != '':
-        a += ' with priority [[{}]]'.format(task.priority)
+        a += ' with priority [[{}]] and duedate [[{}]]'.format(task.priority, task.duedate)
     a += '\n'
     return a
