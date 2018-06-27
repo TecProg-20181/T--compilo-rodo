@@ -12,7 +12,8 @@ from command_handler import (new_task,\
                             dependson_task,\
                             priority_task,\
                             start_task,\
-                            help_task,)
+                            help_task,\
+                            create_issue,)
 
 
 def handle_updates(updates):
@@ -74,6 +75,9 @@ def handle_updates(updates):
 
         elif command == '/help':
             help_task(chat)
+
+        elif command == '/create_issue':
+            create_issue(chat, msg)
 
         else:
             send_message("I'm sorry dave. I'm afraid I can't do that.", chat)
