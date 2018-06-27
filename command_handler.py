@@ -49,6 +49,7 @@ def new_task(chat_id, name):
         send_message("New task *TODO* [[{}]] {}".format(task.id, task.name), chat_id)
 
 
+
 def rename_task(chat_id, msg):
     """
     This method will rename a specific task.
