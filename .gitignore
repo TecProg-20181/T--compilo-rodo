@@ -113,4 +113,5 @@ Session.vim
 my_token.py
 # auto-generated tag files
 tags
-
+### Pycharm ###
+.idea/
