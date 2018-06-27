@@ -1,37 +1,76 @@
 # Taskbot
+![PyPI - Python Version](https://img.shields.io/badge/python-3-blue.svg?longCache=true&style=flat-square)
+![TecProg](https://img.shields.io/badge/TecProg-2018.1-red.svg?Cache=true&style=flat-square)
 
-## Começando a mexer no seu bot
+### **Virtualenv**
+
+##### **1. Instale o Pip**
+Para visualizar se você possui o pip instalado, use:
+```shell
+$ pip --version
+```
+
+Caso não tenha o pip instalado, use:
+```shell
+$ sudo apt-get install python3-pip
+```
+
+
+##### **2. Instale o Virtualenv**
+Para visualizar se você possui o virtualenv instalado, use:
+```shell
+$ virtualenv --version
+```
+
+Caso não tenha o pip instalado, use:   
+```shell
+$ sudo pip3 install virtualenv
+```
+
+
+##### **3. Crie um Virtualenv com Python3**
+```shell
+$ virtualenv -p python3 env
+```
+
+
+##### **4. Entre no Virtualenv**
+Entre na pasta que contém seu virtualenv e use:  
+
+```shell 
+$ source env/bin/activate
+```
+
+---
+
+### **Começando a mexer no seu bot**
 - Seguir o tutorial de criação de bots [BotFather](https://core.telegram.org/bots#6-botfather)
 - Adicionar o TOKEN no local indicado no código
 - Cada grupo deve me enviar o TOKEN através do formulário disponibilizado no moodle
 
-# Issues
-- As issues cadastradas são de novas features, bugs e requisitos de segurança
-- Cada grupo deve resolver todas as [issues deste repositório](https://github.com/TecProg-20181/Taskbot)
-
-## Refatorando
-- As oportunidades de refatoração que a equipe encontrar, deve ser cadastrada
-em forma de issue no repositório do time
-
-# Isolando meu ambiente
- o virtualenv é um programa python capaz de isolar seu ambiente. Isso faz co que você crie um ambiente para cada projeto python no qual você esteja trabalhando.Desta forma, as dependências de um projeto não se misturam com as dependências de outro, nem se misturam com as dependências de seu próprio computador. Para instalar o virtualenv basta seguir os passos a seguir:
- ### Passo 1: Entre no terminal e digite o comando: pip install virtualenv
-
-### Passo 2: Para voltar para home, digite: cd 
-
-### Passo3: Escolha um nome para seu ambiente virtual, digite: virtualenv nomeProjeto
-
-### Passo 4: uma pasta nomeProjeto deve ter siso criada, entre nela com cd nomeProjeto
-
-### Passo 5: Para ativar o ambiente virtual, digite: source bin/activate
-
-### Passo 6: Para desativar: digite em qualquer lugar deactivate.
-
-# Atualizando Dependências
+#### **5. Atualizando Dependências**
 O primeiro comando instala a biblioteca requests. O segundo comando instala todas as dependências que existem no arquivo requirements.txt .
-### Comando 1: pip install requests
 
-### Comando 2: pip install -r requirements.txt
+```shell
+$ pip install requests
+```
+```shell
+$ pip install -r requirements.txt 
+```
+---
 
+### **6. Rode o projeto**
+```shell
+$ python taskbot.py
+```
+---
 
+- Para checar as funcionalidades do seu Bot: 
+```shell
+/help
+```
+---
 
+### Issues
+- As issues cadastradas são de novas features, bugs e requisitos de segurança
+- O grupo estava encarregado de resolver as [issues deste repositório](https://github.com/TecProg-20181/Taskbot)
