@@ -28,9 +28,10 @@ def help_task(chat_id):
     send_message(__HELP, chat_id)
 def new_task(chat_id, name):
     task = Task(chat=chat_id, name=name, status='TODO', dependencies='', parents='', priority='')
-    db.session.add(task)
-    db.session.commit()
-    send_message("New task *TODO* [[{}]] {}".format(task.id, task.name), chat_id)
+    if(name != ''):
+        db.session.add(task)
+        db.session.commit()
+        send_message("New task *TODO* [[{}]] {}".format(task.id, task.name), chat_id)
 
 def rename_task(chat_id, msg):
     text = ''
