@@ -120,6 +120,8 @@ def delete_task(chat_id, msg):
     else:
         task_id = int(msg)
         task = db.search_Task(task_id, chat_id)
+        if task == None:
+            return
         for t in task.dependencies.split(',')[:-1]:
             t = db.search_Task(int(t), chat_id)
             t.parents = t.parents.replace('{},'.format(task.id), '')
@@ -254,11 +256,6 @@ def dependson_task(chat_id, msg):
 
         db.session.commit()
         send_message("Task {} dependencies up to date".format(task_id), chat_id)
-
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
 def priority_task(chat_id, msg):
     """
     This method will set the task priority.

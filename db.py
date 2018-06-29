@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+from url_handler import send_message
 
+import sqlalchemy
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.types import *
